@@ -4,3 +4,29 @@ requires = [
   "wheel"
 ]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "obpcreator"
+version = "0.0.1"
+authors = [
+    { name = "Anton Wiberg", email = "wiberg.anton@gmail.com" }
+]
+description = "Generation of open beam path files based on different strategies"
+readme = "README.md"
+license = { file = "LICENSE" }
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent"
+]
+dependencies = [
+    "svgpathtools",
+    "numpy",
+    "matplotlib",
+    "obplib",
+    "pyvista",
+    "shapely",
+    "pydantic",
+    "pytest"
+]
+python-requirements = ">=3.7"
