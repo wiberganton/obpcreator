@@ -87,6 +87,7 @@ class Build(BaseModel):
     post_heat: PostHeat = PostHeat()
     layerfeed: Layerfeed = Layerfeed()
     back_scatter: BackScatter = BackScatter()
+    back_scatter_melting: bool = False
     seperate_parts_obp: bool = False
 
 
