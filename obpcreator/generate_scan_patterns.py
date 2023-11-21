@@ -1,5 +1,6 @@
 from obpcreator.infill import generate_infill
 from obpcreator.contour import generate_contour
+from obplib import SyncPoint
 import obplib as obp
 
 def generate_build_patterns(build, folder_path):
@@ -8,11 +9,11 @@ def generate_build_patterns(build, folder_path):
         layer_obp_elements = []
         for part in build.parts:
             if len(part.layers)>i:
-                layer_obp_elements.extend(generate_part_layer(part.layers[i], part.contour_order, part.contour_setting, part.infill_setting))
+                layer_obp_elements.extend(generate_part_layer(part.layers[i], part.contour_order, part.contour_setting, part.infill_setting, back_scatter_melt=build.back_scatter_melting))
         output_file = folder_path + f"\layer{i}.obp"
         obp.write_obp(layer_obp_elements,output_file)
 
-def generate_part_layer(part_layer, contour_order, contour_settings, infill_settings):
+def generate_part_layer(part_layer, contour_order, contour_settings, infill_settings, back_scatter_melt=False):
     #0=contours before infill, 1=contours after  infill, 2=both before and after infill
     obp_objects = []
     #Generate contours
@@ -24,6 +25,10 @@ def generate_part_layer(part_layer, contour_order, contour_settings, infill_sett
     obp_objects.extend(generate_infill(part_layer.infills.point_infill, infill_settings))
     if contour_order == 1 or contour_order == 2:
         obp_objects.extend(contour_objects)
+    if back_scatter_melt:
+        obp_objects.insert(0, SyncPoint("BseImage", True, 0))
+        obp_objects.insert(0, SyncPoint("BSEGain", True, 0))
+        obp_objects.append(SyncPoint("BseImage", False, 0))
     return obp_objects
     
 def generate_build_file(build, path):

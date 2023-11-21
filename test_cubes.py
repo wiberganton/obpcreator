@@ -21,14 +21,14 @@ mesh14 = pv.Cube(center=(-7.5, -20.0, 7.5), x_length=10.0, y_length=10.0, z_leng
 mesh15 = pv.Cube(center=(7.5, -20.0, 7.5), x_length=10.0, y_length=10.0, z_length=15.0)
 mesh16 = pv.Cube(center=(20.0, -20.0, 7.5), x_length=10.0, y_length=10.0, z_length=15.0)
 
-scan_parameters_infill = ScanParameters(spot_size=1, beam_power=480, scan_speed=1164000, dwell_time=1)
+scan_parameters_infill = ScanParameters(spot_size=1, beam_power=660, scan_speed=1750000, dwell_time=1)
 infill_settings = ScanSettings(scan_parameters=scan_parameters_infill, scan_strategy = "line_snake", strategy_settings={})
 slice_settings = SlicingSettings(layer_height=0.07, outer_offset=0.0, contour_layers=0, contour_offset=0.0, contour_infill_offset=0.0)
 part1 = Part(
     mesh = mesh1,
     infill_setting = infill_settings,
     contour_order = 0,
-    point_offset = 0.1,
+    point_offset = 0.09,
     scan_direction = 0,
     layer_rotation = 67,
     slicing_settings = slice_settings)
@@ -38,20 +38,20 @@ part3 = Part(
     mesh = mesh3,
     infill_setting = infill_settings,
     contour_order = 0,
-    point_offset = 0.1,
+    point_offset = 0.09,
     scan_direction = 0,
     layer_rotation = 67,
     slicing_settings = slice_settings)
 part3 = slice_part(part3)
 
-scan_parameters_infill = ScanParameters(spot_size=10, beam_power=480, scan_speed=1164000, dwell_time=1)
+scan_parameters_infill = ScanParameters(spot_size=1, beam_power=660, scan_speed=1450000, dwell_time=1)
 infill_settings = ScanSettings(scan_parameters=scan_parameters_infill, scan_strategy = "line_snake", strategy_settings={})
 slice_settings = SlicingSettings(layer_height=0.07, outer_offset=0.0, contour_layers=0, contour_offset=0.0, contour_infill_offset=0.0)
 part2 = Part(
     mesh = mesh2,
     infill_setting = infill_settings,
     contour_order = 0,
-    point_offset = 0.1,
+    point_offset = 0.11,
     scan_direction = 0,
     layer_rotation = 67,
     slicing_settings = slice_settings)
@@ -61,7 +61,7 @@ part4 = Part(
     mesh = mesh4,
     infill_setting = infill_settings,
     contour_order = 0,
-    point_offset = 0.1,
+    point_offset = 0.11,
     scan_direction = 0,
     layer_rotation = 67,
     slicing_settings = slice_settings)
@@ -205,7 +205,7 @@ part16 = Part(
     slicing_settings = slice_settings)
 part16 = slice_part(part16)
 
-back_scatter = BackScatter(file="path_to_replace/back_scatter.obp", start_layer=0, step=2)
+back_scatter = BackScatter(file="path_to_replace/back_scatter.obp", start_layer=0, step=1)
 build = Build(parts=[part16, 
                      part15, 
                      part14, 
