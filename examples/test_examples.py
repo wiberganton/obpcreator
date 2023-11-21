@@ -45,5 +45,5 @@ part2 = slice_part(part2)
 build = Build(parts=[part1,part2],layer_height=0.1)
 
 #vis_part_layer(part1.layers[0])
-generate_build_patterns(build, r"C:\Users\antwi87\Downloads\TMPX_print_20231011\screw_2023_10_12")
-generate_build_file(build, r"C:\Users\antwi87\Downloads\TMPX_print_20231011\screw_2023_10_12\run_file.yml")
+#generate_build_patterns(build, r"C:\Users\antwi87\Downloads\TMPX_print_20231011\screw_2023_10_12")
+#generate_build_file(build, r"C:\Users\antwi87\Downloads\TMPX_print_20231011\screw_2023_10_12\run_file.yml")

@@ -1,6 +1,4 @@
-import json
-from typing import Any, List, Literal, Optional, Dict
-import numpy as np
+from typing import Any, List, Dict
 from pydantic import BaseModel
 
 class ScanParameters(BaseModel):
