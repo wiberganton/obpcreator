@@ -116,8 +116,8 @@ def slice_mesh(mesh, layer_height):
         z_pos = z_pos + layer_height
     return slices
 
-def slice_part(part):
-    slices = slice_mesh(part.mesh, part.slicing_settings.layer_height)
+def slice_part(part, layer_height):
+    slices = slice_mesh(part.mesh, layer_height)
     layers = []
     angle = part.scan_direction
     for slice in slices:

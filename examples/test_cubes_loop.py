@@ -46,7 +46,6 @@ parts = []
 for part in settings:
     scan_parameters_infill = ScanParameters(spot_size=int(part[4]), beam_power=int(part[3]), scan_speed=int(part[1]*1000), dwell_time=1)
     infill_settings = ScanSettings(scan_parameters=scan_parameters_infill, scan_strategy = "line_snake", strategy_settings={})
-    slice_settings = SlicingSettings(layer_height=0.07, outer_offset=0.0, contour_layers=0, contour_offset=0.0, contour_infill_offset=0)
     part1 = Part(
         mesh = part[0],
         infill_setting = infill_settings,
@@ -54,15 +53,13 @@ for part in settings:
         contour_order = 0,
         point_offset = part[2],
         scan_direction = 0,
-        layer_rotation = 67,
-        slicing_settings = slice_settings)
-    part1 = slice_part(part1)
+        layer_rotation = 67)
     parts.append(part1)
 
 back_scatter = BackScatter(file=r"path_to_replace/new_BSE.obp", start_layer=0, step=3)
 build = Build(parts=parts,layer_height=0.07, back_scatter=back_scatter)
 
 #vis_part_layer(part1.layers[0])
-path = r"C:\Users\antwi87\Downloads\TMPX_print_20231011\cube_test_20231127"
+path = r"C:\Users\antwi87\Downloads\TMPX_print_20231011\cubetest3"
 generate_build_patterns(build, path)
 generate_build_file(build, path + r"\run_file.yml")

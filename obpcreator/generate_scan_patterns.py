@@ -1,9 +1,15 @@
 from obpcreator.infill import generate_infill
 from obpcreator.contour import generate_contour
+from obpcreator.support_functions.slicer import slice_part
 from obplib import SyncPoint
 import obplib as obp
 
 def generate_build_patterns(build, folder_path):
+    sliced_parts = []
+    for part in build.parts:
+        sliced_parts.append(slice_part(part, build.layer_height))
+    build.parts = sliced_parts
+    
     max_layers = get_max_layers(build)
     for i in range(max_layers):
         layer_obp_elements = []

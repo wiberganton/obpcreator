@@ -13,11 +13,10 @@ class ScanSettings(BaseModel):
     strategy_settings: Dict[str, Any] = {}
 
 class SlicingSettings(BaseModel):
-    layer_height: float #in mm
-    outer_offset: float #Offset between mesh and first manufacturing point, in mm
+    outer_offset: float = 0 #Offset between mesh and first manufacturing point, in mm
     contour_layers: int = 0 #nmb of contours
-    contour_offset: float #Offset between contour layers, in mm
-    contour_infill_offset: float #Offset between contours and infill, in mm
+    contour_offset: float = 0 #Offset between contour layers, in mm
+    contour_infill_offset: float = 0 #Offset between contours and infill, in mm
 
 class PointInfill(BaseModel):
     coord_matrix: Any #numpy matrix with the coords of the points as complex numbers in mm
@@ -45,7 +44,7 @@ class Part(BaseModel):
     point_offset: float #offset distance between scan points used in mm
     scan_direction: float = 0 #scan angle of first layer
     layer_rotation: float = 0 #rotation between each layer 
-    slicing_settings: SlicingSettings
+    slicing_settings: SlicingSettings = SlicingSettings()
 
 class StartHeat(BaseModel):
     file: str = ""
