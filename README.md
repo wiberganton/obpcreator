@@ -4,7 +4,9 @@ Install it by cloning the git reprository or from PyPi using:
 pip install obpcreator
 ```
 
+
 # Example from pyvista cube
+```bash
 import pyvista as pv
 
 from obpcreator.data_model import ScanSettings, Part, Build, SlicingSettings, ScanParameters, BackScatter
@@ -66,11 +68,10 @@ for part in settings:
 back_scatter = BackScatter(file=r"path_to_replace/new_BSE.obp", start_layer=0, step=3)
 build = Build(parts=parts,layer_height=0.07, back_scatter=back_scatter)
 
-#vis_part_layer(part1.layers[0])
 path = r"C:\Users\antwi87\Downloads\TMPX_print_20231011\cubetest3"
 generate_build_patterns(build, path)
 generate_build_file(build, path + r"\run_file.yml")
-
+```
 
 
 

@@ -44,8 +44,10 @@ settings = [
 parts = []
 
 for part in settings:
-    scan_parameters_infill = ScanParameters(spot_size=int(part[4]), beam_power=int(part[3]), scan_speed=int(part[1]*1000), dwell_time=1)
-    infill_settings = ScanSettings(scan_parameters=scan_parameters_infill, scan_strategy = "line_snake", strategy_settings={})
+    scan_parameters_infill = ScanParameters(spot_size=int(part[4]), beam_power=int(part[3]), scan_speed=int(part[1]*1000), dwell_time=50000)
+    infill_settings = ScanSettings(scan_parameters=scan_parameters_infill, scan_strategy = "point_random", strategy_settings={})
+    scan_parameters_contour = ScanParameters(spot_size=int(part[4]), beam_power=int(part[3]), scan_speed=int(part[1]*1000), dwell_time=50000)
+    contour_settings = ScanSettings(scan_parameters=scan_parameters_contour, scan_strategy = "line_simple", strategy_settings={})
     part1 = Part(
         mesh = part[0],
         infill_setting = infill_settings,
@@ -60,6 +62,6 @@ back_scatter = BackScatter(file=r"path_to_replace/new_BSE.obp", start_layer=0, s
 build = Build(parts=parts,layer_height=0.07, back_scatter=back_scatter)
 
 #vis_part_layer(part1.layers[0])
-path = r"C:\Users\antwi87\Downloads\TMPX_print_20231011\cubetest3"
+path = r"C:\Users\antwi87\Downloads\TMPX_print_20231011\cube_test4"
 generate_build_patterns(build, path)
 generate_build_file(build, path + r"\run_file.yml")

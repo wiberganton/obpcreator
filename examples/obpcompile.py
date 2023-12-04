@@ -1,9 +1,17 @@
 import obplib as obp
 
-#path = r"C:\Users\antwi87\Downloads\TMPX_print_20231011\cube_test20231108\LG_660W-40um_60by60_V.obp"
+#obp to obpj
+path = r"C:\Users\antwi87\Downloads\TMPX_print_20231011\cube_test20231108\LG_660W-40um_60by60_V.obp"
+elements = obp.read_obp(path)
+out_path = path + "j"
+obp.write_obpj(elements, out_path)
 
-#elements = obp.read_obp(path)
-#out_path = path + "j"
+#obj to obp
+path = r"C:\Users\antwi87\Downloads\TMPX_print_20231011\cube_test20231108\LG_660W-40um_60by60_V.obpj"
+elements = obp.read_obpj(path)
+out_path = path[:-1]
+obp.write_obpj(elements, out_path)
+
 #out_path = r"C:\Users\antwi87\Downloads\TMPX_print_20231011\cube_test20231108\new_BSE.obpj"
 #obp.write_obpj(elements, out_path)
 
