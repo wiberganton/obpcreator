@@ -1,4 +1,4 @@
-from typing import Any, List, Dict
+from typing import Any, List, Dict, Optional
 from pydantic import BaseModel
 
 class ScanParameters(BaseModel):
@@ -41,7 +41,9 @@ class Part(BaseModel):
     contour_setting: ScanSettings = ScanSettings()
     layers: List[PartLayer] = []
     contour_order: int = 0 #0=contours before infill, 1=contours after  infill, 2=both before and after infill
-    point_offset: float #offset distance between scan points used in mm
+    #point_offset: float #offset distance between scan points used in mm
+    point_offset: Optional[float] = None #offset distance between scan points used in mm
+    hatch_distance: Optional[float] = None #Hatch distance distance in mm
     scan_direction: float = 0 #scan angle of first layer
     layer_rotation: float = 0 #rotation between each layer 
     slicing_settings: SlicingSettings = SlicingSettings()

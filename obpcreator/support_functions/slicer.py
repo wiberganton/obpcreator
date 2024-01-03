@@ -43,6 +43,8 @@ def sort_dominoes(dominoes):
 
 
 def py_to_mpl_path(pv_path):
+    if pv_path.n_points == 0:
+        return []
     pv_lines = []
     for i in range(1,len(pv_path.lines),3):
         pv_lines.append((pv_path.lines[i],pv_path.lines[i+1]))
@@ -109,11 +111,28 @@ def slice_mesh(mesh, layer_height):
     min_z, max_z = find_min_max_z(mesh)
     slices = []
     z_pos = min_z+layer_height/2
+    nmb_of_layers = int((max_z-min_z)/layer_height)
+    i=1
+    print("slicing...")
     while z_pos < max_z:
+        print(f"{i}/{nmb_of_layers}", end='\r')
         single_slice = mesh.slice(normal=[0, 0, 1],origin=(0,0,z_pos))
         mpl_path = py_to_mpl_path(single_slice)
-        slices.append([mpl_path])
+        if mpl_path != []:
+            slices.append([mpl_path])
+            import matplotlib.pyplot as plt
+            import matplotlib.patches as patches
+            from matplotlib.path import Path
+            fig, ax = plt.subplots()
+            for path in mpl_path:
+                patch = patches.PathPatch(path, facecolor='orange', lw=2)
+                ax.add_patch(patch)
+            ax.set_xlim(-100, 100)
+            ax.set_ylim(-100, 100)
+            plt.show()
         z_pos = z_pos + layer_height
+        i = i+1
+    
     return slices
 
 def slice_part(part, layer_height):
