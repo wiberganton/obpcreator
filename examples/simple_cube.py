@@ -4,7 +4,7 @@ from obpcreator.data_model import ScanSettings, Part, Build, SlicingSettings, Sc
 from obpcreator.support_functions.slicer import slice_part
 from obpcreator.generate_scan_patterns import generate_build_patterns, generate_build_file
 
-mesh1 = pv.Cube(center=(0, 0, 0), x_length=10.0, y_length=10.0, z_length=5)
+mesh1 = pv.Cube(center=(0, 0, 7), x_length=10.0, y_length=10.0, z_length=10)
 
 
 scan_parameters_infill = ScanParameters(spot_size=1, beam_power=720, scan_speed=140000, dwell_time=50000)
@@ -26,6 +26,6 @@ part1 = Part(
 build = Build(parts=[part1],layer_height=1.0)
 
 #vis_part_layer(part1.layers[0])
-path = r"C:\Users\antwi87\Downloads\TMPX_print_20231011\cube_test4"
+path = r"C:\Users\antwi87\Downloads\slicing_test_2024_01_10"
 generate_build_patterns(build, path)
 generate_build_file(build, path + r"\run_file.yml")

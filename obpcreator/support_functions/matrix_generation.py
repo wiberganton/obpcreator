@@ -98,7 +98,10 @@ def check_points_in_path(coord_matrix, paths):
     return keep_matrix
 
 def create_matrices(paths, spacing, angle):
-    (min_x, min_y), (max_x, max_y) = get_path_bounds(paths)
+    if not paths:
+        (min_x, min_y), (max_x, max_y) = (-1,-1),(1,1)
+    else:
+        (min_x, min_y), (max_x, max_y) = get_path_bounds(paths)
     coord_matrix = generate_coord_matrix(min_x, max_x, min_y, max_y, spacing, angle=angle)
     keep_matrix = check_points_in_path(coord_matrix, paths)
     return coord_matrix, keep_matrix

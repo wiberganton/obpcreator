@@ -1,4 +1,6 @@
 import pyvista as pv
+import numpy as np
+from shapely.geometry import Polygon
 from matplotlib.path import Path
 from obpcreator.support_functions.offset_paths import offset_array
 from obpcreator.data_model import Infill, Contour, PartLayer, PointInfill
@@ -15,55 +17,27 @@ def find_min_max_z(mesh): #Finds min and max point in the z-direction
                max_value = z_value
       return min_value, max_value
         
-
-def find_in_list_of_tuples(to_find,tuples_list):
-    for i in range(len(tuples_list)):
-        if tuples_list[i][0] == to_find:
-            return i
-    return None
-
-
-def sort_dominoes(dominoes):
-    all_paths = []
-
-    sorted_list = [dominoes[0][0],dominoes[0][1]]
-    dominoes.pop(0)
-
-    while len(dominoes) > 0:
-        result = find_in_list_of_tuples(sorted_list[-1],dominoes)
-        if result == None:
-            all_paths.append(sorted_list)
-            sorted_list = [dominoes[0][0],dominoes[0][1]]
-            dominoes.pop(0)
-        else:
-            sorted_list.append(dominoes[result][1])
-            dominoes.pop(result)
-    all_paths.append(sorted_list)
-    return all_paths
-
-
-def py_to_mpl_path(pv_path):
-    if pv_path.n_points == 0:
-        return []
-    pv_lines = []
-    for i in range(1,len(pv_path.lines),3):
-        pv_lines.append((pv_path.lines[i],pv_path.lines[i+1]))
-    line_points = sort_dominoes(pv_lines)
-    
-    all_points = pv_path.points
-
-    mpl_paths = []
-    for path_points in line_points:
-        codes = [Path.MOVETO]
-        path_lines = []
-        for point in path_points:
-            path_lines.append((all_points[point][0],all_points[point][1]))
-            codes.append(Path.LINETO)
-        codes.pop(1)
-        codes[-1] = (Path.CLOSEPOLY)
-        mpl_paths.append(Path(path_lines, codes))
-
-    return mpl_paths
+def pv2mpl(pvPath): 
+    #converts a path from pyvista polydata to a matplotlib path
+    def _extract_lines_info(lines):
+        offset = 0
+        line_conn = []
+        while offset < len(lines):
+            line_length = lines[offset]
+            line_conn.append(tuple(lines[offset + 1 : offset + 1 + line_length]))
+            offset += line_length + 1
+        return line_conn
+    res = pvPath.strip()
+    lines = _extract_lines_info(res.lines)
+    points = pvPath.points
+    paths = []
+    for line in lines:
+        vertices = [points[index][:2] for index in line]  # Extracting the x and y coordinates
+        vertices.append((0, 0))  # Close the path
+        codes = [Path.MOVETO] + [Path.LINETO] * (len(line) - 1) + [Path.CLOSEPOLY]
+        path = Path(vertices, codes)
+        paths.append(path)
+    return paths
 
 def combine_arrays(arrays):
     #create a new array with matplotlibs which adds different sliced stl files into different shapes
@@ -93,7 +67,7 @@ def slice_stl_file(stl_string, layer_height):
     z_pos = min_z+layer_height/2
     while z_pos < max_z:
         single_slice = mesh.slice(normal=[0, 0, 1],origin=(0,0,z_pos))
-        mpl_path = py_to_mpl_path(single_slice)
+        mpl_path = pv2mpl(single_slice)
         slices.append([mpl_path])
         z_pos = z_pos + layer_height
     return slices
@@ -110,29 +84,12 @@ def slice_stl(paths, layer_height):
 def slice_mesh(mesh, layer_height):
     min_z, max_z = find_min_max_z(mesh)
     slices = []
-    z_pos = min_z+layer_height/2
-    nmb_of_layers = int((max_z-min_z)/layer_height)
-    i=1
-    print("slicing...")
+    z_pos = layer_height/2
     while z_pos < max_z:
-        print(f"{i}/{nmb_of_layers}", end='\r')
         single_slice = mesh.slice(normal=[0, 0, 1],origin=(0,0,z_pos))
-        mpl_path = py_to_mpl_path(single_slice)
-        if mpl_path != []:
-            slices.append([mpl_path])
-            import matplotlib.pyplot as plt
-            import matplotlib.patches as patches
-            from matplotlib.path import Path
-            fig, ax = plt.subplots()
-            for path in mpl_path:
-                patch = patches.PathPatch(path, facecolor='orange', lw=2)
-                ax.add_patch(patch)
-            ax.set_xlim(-100, 100)
-            ax.set_ylim(-100, 100)
-            plt.show()
+        mpl_path = pv2mpl(single_slice)
+        slices.append([mpl_path])  
         z_pos = z_pos + layer_height
-        i = i+1
-    
     return slices
 
 def slice_part(part, layer_height):
