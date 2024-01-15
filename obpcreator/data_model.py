@@ -12,41 +12,59 @@ class ScanSettings(BaseModel):
     scan_strategy: str = ""
     strategy_settings: Dict[str, Any] = {}
 
-class SlicingSettings(BaseModel):
-    outer_offset: float = 0 #Offset between mesh and first manufacturing point, in mm
-    contour_layers: int = 0 #nmb of contours
-    contour_offset: float = 0 #Offset between contour layers, in mm
-    contour_infill_offset: float = 0 #Offset between contours and infill, in mm
+class PointGeometry(BaseModel):
+    coord_matrix: Any #3D numpy matrix with the coords of the points as complex numbers in mm
+    keep_matrix: Any #3D numpy matrix with which points to manufacture
+    def get_layer(self, layer):
+        x_coords = self.coord_matrix[:, :, layer, 0]
+        y_coords = self.coord_matrix[:, :, layer, 1]
+        coords = x_coords + 1j * y_coords
+        return coords, self.keep_matrix[:,:,layer]
+    def get_contours(self, layer):
+        matrix = self.keep_matrix[:,:,layer]
+        #binary_image = np.uint8(matrix)
+        contours, _ = cv2.findContours(matrix, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        grouped_edges = [contour[:, 0, :] for contour in contours]
 
-class PointInfill(BaseModel):
-    coord_matrix: Any #numpy matrix with the coords of the points as complex numbers in mm
-    keep_matrix: Any #numpy matrix with which points to manufacture
+        extracted_values = []
+        x_coords = self.coord_matrix[:, :, layer, 0]
+        y_coords = self.coord_matrix[:, :, layer, 1]
+        coords = x_coords + 1j * y_coords
+        for contour in grouped_edges:
+            # Extract values for each contour
+            contour_values = [coords[row, col] for row, col in contour]
+            extracted_values.append(contour_values)
+        return extracted_values
+    def offset_contours(self, offset_distance):
+        point_distance = self.coord_matrix[1,0,0,0] - self.coord_matrix[0,0,0,0]
+        offset_steps = round(offset_distance/point_distance)
+        keep_matrix = copy(self.keep_matrix)
+        for i in range(keep_matrix.shape[2]):
+            matrix = keep_matrix[:,:,i]
+            if offset_steps > 0:
+                for _ in range(offset_steps):
+                    matrix = binary_dilation(matrix)
+            else:
+                for _ in range(abs(offset_steps)):
+                    matrix = binary_erosion(matrix)
+            keep_matrix[:,:,i] = matrix.astype(int)
+        return PointGeometry(coord_matrix=self.coord_matrix, keep_matrix=keep_matrix)
 
 class Infill(BaseModel):
-    paths: List[Any] #List of matplotlib paths
-    scan_angle: float = 0 #Angle (deg) in which normal scanning happens
-    point_infill: PointInfill
+    settings: ScanSettings = None
+    infill_offset: float = 0
 
 class Contour(BaseModel):
-    paths: List[Any] #List of matplotlib paths
-    start_angle: float = 0 #Angle (deg) where to start the contour
-
-class PartLayer(BaseModel):
-    infills: Infill = None
-    contours: List[Contour] = []
+    settings: ScanSettings = None
+    numb_of_layers: int = 0
+    outer_offset: float = 0
+    contour_offset: float = 0
 
 class Part(BaseModel):
-    mesh: Any #Pyvista mesh
-    infill_setting: ScanSettings = ScanSettings()
-    contour_setting: ScanSettings = ScanSettings()
-    layers: List[PartLayer] = []
+    point_geometry: PointGeometry
+    infill_setting: Infill = None
+    contour_setting: Contour = None
     contour_order: int = 0 #0=contours before infill, 1=contours after  infill, 2=both before and after infill
-    #point_offset: float #offset distance between scan points used in mm
-    point_offset: Optional[float] = None #offset distance between scan points used in mm
-    hatch_distance: Optional[float] = None #Hatch distance distance in mm
-    scan_direction: float = 0 #scan angle of first layer
-    layer_rotation: float = 0 #rotation between each layer 
-    slicing_settings: SlicingSettings = SlicingSettings()
 
 class StartHeat(BaseModel):
     file: str = ""
