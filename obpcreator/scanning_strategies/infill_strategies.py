@@ -25,75 +25,75 @@ def snake_sort(t):
 def right_sort(t):
     return (t[0], -t[1])
     
-def line_snake(point_infill, scan_settings):
-    coord_matrix = point_infill.coord_matrix
-    keep_matrix = point_infill.keep_matrix
+def line_snake(part, layer):
+    coord_matrix, keep_matrix = part.point_geometry.get_layer(layer)
+    scan_settings = part.infill_setting.beam_settings
     left, right = find_start_end_line_positions(keep_matrix)
     snake_sorted_left = sorted(left, key=snake_sort)
     snake_sorted_right = sorted(right, key=snake_sort)
     obp_elements = []
-    bp = obp.Beamparameters(scan_settings.scan_parameters.spot_size, scan_settings.scan_parameters.beam_power)
+    bp = obp.Beamparameters(scan_settings.spot_size, scan_settings.beam_power)
     for i in range(len(snake_sorted_left)):
         start_coord = coord_matrix[snake_sorted_left[i][0]][snake_sorted_left[i][1]]
         end_coord = coord_matrix[snake_sorted_right[i][0]][snake_sorted_right[i][1]]
         if start_coord==end_coord:
             a = obp.Point(start_coord.real*1000, start_coord.imag*1000)
             obp.Point(start_coord.real*1000, start_coord.imag*1000)
-            obp_elements.append(obp.TimedPoints([a], [scan_settings.scan_parameters.dwell_time], bp))
+            obp_elements.append(obp.TimedPoints([a], [scan_settings.dwell_time], bp))
         else:
             a = obp.Point(start_coord.real*1000, start_coord.imag*1000)
             b = obp.Point(end_coord.real*1000, end_coord.imag*1000)
-            obp_elements.append(obp.Line(a,b,scan_settings.scan_parameters.scan_speed,bp))
+            obp_elements.append(obp.Line(a,b,scan_settings.scan_speed,bp))
     return obp_elements
 
-def line_left_right(point_infill, scan_settings):
-    coord_matrix = point_infill.coord_matrix
-    keep_matrix = point_infill.keep_matrix
+def line_left_right(part, layer):
+    coord_matrix, keep_matrix = part.point_geometry.get_layer(layer)
+    scan_settings = part.infill_setting.beam_settings
     left, right = find_start_end_line_positions(keep_matrix)
     obp_elements = []
-    bp = obp.Beamparameters(scan_settings.scan_parameters.spot_size, scan_settings.scan_parameters.beam_power)
+    bp = obp.Beamparameters(scan_settings.spot_size, scan_settings.beam_power)
     for i in range(len(left)):
         start_coord = coord_matrix[left[i][0]][left[i][1]]
         end_coord = coord_matrix[right[i][0]][right[i][1]]
         if start_coord==end_coord:
             obp.Point(start_coord.real*1000, start_coord.imag*1000)
-            obp_elements.append(obp.TimedPoints([a], [scan_settings.scan_parameters.dwell_time], bp))
+            obp_elements.append(obp.TimedPoints([a], [scan_settings.dwell_time], bp))
         else:
             a = obp.Point(start_coord.real*1000, start_coord.imag*1000)
             b = obp.Point(end_coord.real*1000, end_coord.imag*1000)
-            obp_elements.append(obp.Line(a,b,scan_settings.scan_parameters.scan_speed,bp))
+            obp_elements.append(obp.Line(a,b,scan_settings.scan_speed,bp))
     return obp_elements
 
-def line_right_left(point_infill, scan_settings):
-    coord_matrix = point_infill.coord_matrix
-    keep_matrix = point_infill.keep_matrix
+def line_right_left(part, layer):
+    coord_matrix, keep_matrix = part.point_geometry.get_layer(layer)
+    scan_settings = part.infill_setting.beam_settings
     left, right = find_start_end_line_positions(keep_matrix)
     snake_sorted_left = sorted(left, key=right_sort)
     snake_sorted_right = sorted(right, key=right_sort)
     obp_elements = []
-    bp = obp.Beamparameters(scan_settings.scan_parameters.spot_size, scan_settings.scan_parameters.beam_power)
+    bp = obp.Beamparameters(scan_settings.spot_size, scan_settings.beam_power)
     for i in range(len(snake_sorted_left)):
         start_coord = coord_matrix[snake_sorted_left[i][0]][snake_sorted_left[i][1]]
         end_coord = coord_matrix[snake_sorted_right[i][0]][snake_sorted_right[i][1]]
         if start_coord==end_coord:
-            obp.Point(start_coord.real*1000, start_coord.imag*1000)
-            obp_elements.append(obp.TimedPoints([a], [scan_settings.scan_parameters.dwell_time], bp))
+            a = obp.Point(start_coord.real*1000, start_coord.imag*1000)
+            obp_elements.append(obp.TimedPoints([a], [scan_settings.dwell_time], bp))
         else:
             a = obp.Point(start_coord.real*1000, start_coord.imag*1000)
             b = obp.Point(end_coord.real*1000, end_coord.imag*1000)
-            obp_elements.append(obp.Line(a,b,scan_settings.scan_parameters.scan_speed,bp))
+            obp_elements.append(obp.Line(a,b,scan_settings.scan_speed,bp))
     return obp_elements
 
-def point_random(point_infill, scan_settings):
-    coord_matrix = point_infill.coord_matrix
-    keep_matrix = point_infill.keep_matrix
+def point_random(part, layer):
+    coord_matrix, keep_matrix = part.point_geometry.get_layer(layer)
+    scan_settings = part.infill_setting.beam_settings
     selected_values = coord_matrix[keep_matrix == 1]
     np.random.shuffle(selected_values)
     obp_elements = []
-    bp = obp.Beamparameters(scan_settings.scan_parameters.spot_size, scan_settings.scan_parameters.beam_power)
+    bp = obp.Beamparameters(scan_settings.spot_size, scan_settings.beam_power)
     for point in selected_values:
         a = obp.Point(point.real*1000, point.imag*1000)
-        obp_elements.append(obp.TimedPoints([a], [scan_settings.scan_parameters.dwell_time], bp))
+        obp_elements.append(obp.TimedPoints([a], [scan_settings.dwell_time], bp))
     return obp_elements
 
 

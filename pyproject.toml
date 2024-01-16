@@ -27,6 +27,8 @@ dependencies = [
     "pyvista",
     "shapely",
     "pydantic",
-    "pytest"
+    "pytest",
+    "cv2",
+    "scipy",
 ]
 requires-python = ">=3.7"

@@ -1,16 +1,14 @@
 from typing import Any, List, Dict, Optional
 from pydantic import BaseModel
+from numpy import copy
+from scipy.ndimage import binary_dilation, binary_erosion
+import cv2
 
 class ScanParameters(BaseModel):
     spot_size: int = 1 #[-] 1-100
     beam_power: int = 1 #[W]
     scan_speed: int = 1800000 #[micrometers/second]
     dwell_time: int = 1 #[ns]
-
-class ScanSettings(BaseModel):
-    scan_parameters: ScanParameters = ScanParameters()
-    scan_strategy: str = ""
-    strategy_settings: Dict[str, Any] = {}
 
 class PointGeometry(BaseModel):
     coord_matrix: Any #3D numpy matrix with the coords of the points as complex numbers in mm
@@ -19,7 +17,7 @@ class PointGeometry(BaseModel):
         x_coords = self.coord_matrix[:, :, layer, 0]
         y_coords = self.coord_matrix[:, :, layer, 1]
         coords = x_coords + 1j * y_coords
-        return coords, self.keep_matrix[:,:,layer]
+        return coords, self.keep_matrix[:,:,layer] 
     def get_contours(self, layer):
         matrix = self.keep_matrix[:,:,layer]
         #binary_image = np.uint8(matrix)
@@ -51,11 +49,15 @@ class PointGeometry(BaseModel):
         return PointGeometry(coord_matrix=self.coord_matrix, keep_matrix=keep_matrix)
 
 class Infill(BaseModel):
-    settings: ScanSettings = None
+    beam_settings: ScanParameters = None
+    scan_strategy: str = ""
+    strategy_settings: Dict[str, Any] = {}
     infill_offset: float = 0
 
 class Contour(BaseModel):
-    settings: ScanSettings = None
+    beam_settings: ScanParameters = None
+    scan_strategy: str = ""
+    strategy_settings: Dict[str, Any] = {}
     numb_of_layers: int = 0
     outer_offset: float = 0
     contour_offset: float = 0

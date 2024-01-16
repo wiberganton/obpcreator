@@ -90,6 +90,8 @@ def slice_mesh(mesh, layer_height):
         mpl_path = pv2mpl(single_slice)
         slices.append([mpl_path])  
         z_pos = z_pos + layer_height
+        if not not mpl_path:
+            single_slice.plot()
     return slices
 
 def slice_part(part, layer_height):
