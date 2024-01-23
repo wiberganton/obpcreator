@@ -2,18 +2,8 @@ import pyvista as pv
 import obpcreator.support_functions.pv_mesh_manipulation as pv_mesh_manipulation
 from obpcreator import data_model, point_infill_creation, generate_build
 
-path = r"C:\Users\antwi87\Downloads\OneDrive_1_1-17-2024 (1)\STL"
-mesh1 = pv.read(path + r"\Solid1.stl")
-mesh1 = pv_mesh_manipulation.place_on_pos(mesh1,(0,0,0))
-mesh2 = pv.read(path + r"\Solid2.stl")
-mesh2 = pv_mesh_manipulation.place_on_pos(mesh2,(19.5,19.5,0))
-mesh3 = pv.read(path + r"\Solid3.stl")
-mesh3 = pv_mesh_manipulation.place_on_pos(mesh3,(-19.5,19.5,0))
-mesh4 = pv.read(path + r"\Solid4.stl")
-mesh4 = pv_mesh_manipulation.place_on_pos(mesh4,(-19.5,-19.5,0))
-mesh5 = pv.read(path + r"\Solid5.stl")
-mesh5 = pv_mesh_manipulation.place_on_pos(mesh5,(19.5,-19.5,0))
-meshes = [mesh1, mesh2, mesh3, mesh4, mesh5]
+mesh1 = pv.Cube(center=(0,0,5), x_length=10, y_length=10, z_length=10)
+meshes = [mesh1]
 
 infill_setting = data_model.ScanParameters(
     spot_size = 10, #[-] 1-100

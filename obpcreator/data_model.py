@@ -3,12 +3,29 @@ from pydantic import BaseModel
 from numpy import copy
 from scipy.ndimage import binary_dilation, binary_erosion
 import cv2
+import math
 
 class ScanParameters(BaseModel):
     spot_size: int = 1 #[-] 1-100
     beam_power: int = 1 #[W]
     scan_speed: int = 1800000 #[micrometers/second]
     dwell_time: int = 1 #[ns]
+
+class SlicingSettings(BaseModel):
+    point_distance: float = 0.1  #mm
+    layer_height: float = 0.1 #mm
+    hatch_distance: float = math.sqrt(3/4)*0.1  #mm
+    start_angle: float = 0 #deg 
+    rotation_angle: float = 0 #deg 
+    uniform_point_dist: bool = True
+    offset_margin: float = 1 #mm
+
+    def __init__(self, **data):
+        if 'hatch_distance' in data and 'point_distance' not in data:
+            data['point_distance'] = data['hatch_distance']/math.sqrt(3/4)
+        if 'point_distance' in data:
+            data['hatch_distance'] = data['point_distance']*math.sqrt(3/4)
+        super().__init__(**data)
 
 class PointGeometry(BaseModel):
     coord_matrix: Any #3D numpy matrix with the coords of the points as complex numbers in mm

@@ -5,26 +5,34 @@ import copy
 
 def generate_build(build, folder_path):    
     max_layers = get_max_layers(build)
+    build_infill = []
+    for part in build.parts:
+        point_geometry = part.point_geometry.offset_contours(part.infill_setting.infill_offset)
+        copied_part = copy.deepcopy(part)
+        copied_part.point_geometry = point_geometry
+        build_infill.append(copied_part)
+
     for i in range(max_layers):
         layer_obp_elements = []
-        for part in build.parts:
+        for ii in range(len(build.parts)):
             if part.point_geometry.keep_matrix.shape[2]>i:
-                layer_obp_elements.extend(generate_part_layer(part, i, back_scatter_melt=build.back_scatter_melting))
+                layer_obp_elements.extend(generate_part_layer(build.parts[ii], build_infill[ii], i, back_scatter_melt=build.back_scatter_melting))
         output_file = folder_path + f"\layer{i}.obp"
         obp.write_obp(layer_obp_elements,output_file)
+    generate_build_file(build, folder_path + r"\build_file.yml")
 
-def generate_part_layer(part, layer, back_scatter_melt=False):
-    contour_order = part.contour_order
+def generate_part_layer(contour_part, infill_part, layer, back_scatter_melt=False):
+    contour_order = contour_part.contour_order
     #0=contours before infill, 1=contours after  infill, 2=both before and after infill
     obp_objects = []
     #Generate contours
     contour_objects = []
-    if part.contour_setting is not None:
-        for contour in range(part.contour_setting.numb_of_layers):
-            contour_objects = generate_contour(part, layer)
+    if contour_part.contour_setting is not None:
+        for contour in range(contour_part.contour_setting.numb_of_layers):
+            contour_objects = generate_contour(contour_part, layer)
     if contour_order == 0 or contour_order == 2:
         obp_objects.extend(contour_objects)
-    obp_objects.extend(generate_infill(part, layer))
+    obp_objects.extend(generate_infill(infill_part, layer))
     if contour_order == 1 or contour_order == 2:
         obp_objects.extend(contour_objects)
     if back_scatter_melt:
@@ -92,10 +100,7 @@ def generate_contour(part, layer):
 def generate_infill(part, layer):
     strategy_func = getattr(infill_strategies, part.infill_setting.scan_strategy, None)
     if strategy_func:
-        point_geometry = part.point_geometry.offset_contours(part.infill_setting.infill_offset)
-        copied_part = copy.deepcopy(part)
-        copied_part.point_geometry = point_geometry
-        return strategy_func(copied_part, layer)
+        return strategy_func(part, layer)
         #return strategy_func(point_infill, scan_settings)
     else:
         print(f"No function named {part.infill_setting.scan_strategy,} exists")

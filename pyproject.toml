@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "obpcreator"
-version = "0.0.2"
+version = "0.0.5"
 authors = [
     { name = "Anton Wiberg", email = "wiberg.anton@gmail.com" }
 ]
@@ -28,7 +28,7 @@ dependencies = [
     "shapely",
     "pydantic",
     "pytest",
-    "cv2",
+    "opencv-python",
     "scipy",
 ]
 requires-python = ">=3.7"
