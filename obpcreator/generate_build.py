@@ -15,7 +15,7 @@ def generate_build(build, folder_path):
     for i in range(max_layers):
         layer_obp_elements = []
         for ii in range(len(build.parts)):
-            if part.point_geometry.keep_matrix.shape[2]>i:
+            if build.parts[ii].point_geometry.keep_matrix.shape[2]>i:
                 layer_obp_elements.extend(generate_part_layer(build.parts[ii], build_infill[ii], i, back_scatter_melt=build.back_scatter_melting))
         output_file = folder_path + f"\layer{i}.obp"
         obp.write_obp(layer_obp_elements,output_file)
