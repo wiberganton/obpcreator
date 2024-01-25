@@ -9,6 +9,7 @@ The following scan strategies are supported:
 - `line_left_right`: Simple line scanning left-right,left-right,.., with constant speed.
 - `line_right_left`: Simple line scanning right-left,right-left,.., with constant speed.
 - `point_random`: Spot melting with random order of spots.
+- `point_ordered`: Spot melting jumping along the lines with some predefined distance.
 
 ### line_snake
 no additional settings
@@ -22,11 +23,11 @@ no additional settings
 ### point_random
 no additional settings
 
-### Strategy B Settings
-| Setting Key | Data Type | Description                              | Example Value |
-|-------------|-----------|------------------------------------------|---------------|
-| frequency   | int       | The frequency at which the scan operates | 5             |
-| resolution  | int       | The resolution of the scan                | 300           |
+### point_ordered
+| Setting Key | Data Type | Description                                           | Example Value |
+|-------------|-----------|-------------------------------------------------------|---------------|
+| x_jump      | int       | Number of points that should be jumped in x direction | 2             |
+| y_jump      | int       | Number of points that should be jumped in x direction | 5             |
 
 
 ## Contour strategies

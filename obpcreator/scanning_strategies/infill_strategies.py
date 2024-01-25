@@ -96,13 +96,46 @@ def point_random(part, layer):
         obp_elements.append(obp.TimedPoints([a], [scan_settings.dwell_time], bp))
     return obp_elements
 
+def point_ordered(part, layer):
+    def n_stack(keep_array, coord_array, n_to_stack, stack_row):
+        num_rows = keep_array.shape[0]
+        extended_shape = (num_rows, keep_array.shape[1] + n_to_stack)
+        extended_keep = np.zeros(extended_shape, dtype=keep_array.dtype)
+        extended_coord = np.zeros(extended_shape, dtype=coord_array.dtype)
+        indices = np.arange(num_rows)
+        start_stack = np.floor_divide(indices, stack_row) % 2 == 1
+        end_stack = ~start_stack
+        extended_keep[end_stack, :keep_array.shape[1]] = keep_array[end_stack]
+        extended_coord[end_stack, :coord_array.shape[1]] = coord_array[end_stack]
+        extended_keep[start_stack, n_to_stack:] = keep_array[start_stack]
+        extended_coord[start_stack, n_to_stack:] = coord_array[start_stack]
+        return extended_keep, extended_coord
+    
+    coord_matrix, keep_matrix = part.point_geometry.get_layer(layer)
+    scan_settings = part.infill_setting.beam_settings
+    scan_strategy_settings = part.infill_setting.strategy_settings
+    x_jump = scan_strategy_settings["x_jump"]
+    y_jump = scan_strategy_settings["y_jump"]
 
+    new_keep, new_coord = n_stack(keep_matrix, coord_matrix, int(x_jump/2), y_jump)
 
+    len_x = new_keep.shape[1]
+    len_y = new_keep.shape[0]
 
-
-
-
-
-
-
-
+    new_new_keep = new_keep.reshape(-1)
+    new_new_coord = new_coord.reshape(-1)
+    Y, X = np.meshgrid(np.arange(len_y), np.arange(len_x), indexing='ij')
+    ordered_Y = np.concatenate([Y[i::y_jump, j::x_jump].flatten() for i in range(y_jump) for j in range(x_jump)])
+    ordered_X = np.concatenate([X[i::y_jump, j::x_jump].flatten() for i in range(y_jump) for j in range(x_jump)])
+    order = ordered_Y * len_x + ordered_X
+    coords_reordered = new_new_coord[order]
+    keep_reordered = new_new_keep[order]
+    keep_bool = keep_reordered.astype(bool)
+    filtered_coords2 = coords_reordered[keep_bool]
+    
+    obp_elements = []
+    bp = obp.Beamparameters(scan_settings.spot_size, scan_settings.beam_power)
+    for point in filtered_coords2:
+        a = obp.Point(point.real*1000, point.imag*1000)
+        obp_elements.append(obp.TimedPoints([a], [scan_settings.dwell_time], bp))
+    return obp_elements
