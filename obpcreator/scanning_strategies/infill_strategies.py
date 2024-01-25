@@ -84,6 +84,62 @@ def line_right_left(part, layer):
             obp_elements.append(obp.Line(a,b,scan_settings.scan_speed,bp))
     return obp_elements
 
+from obpcreator.visualisation.layer_vis import vis_keep_layer
+
+def line_spiral_inward(part, layer):
+    def flatten_nested_list(nested_list):
+        """ Recursively flattens a nested list. """
+        flat_list = []
+        for item in nested_list:
+            if isinstance(item, list):
+                flat_list.extend(flatten_nested_list(item))
+            else:
+                flat_list.append(item)
+        return flat_list
+    def perpendicular_distance(pt, line_start, line_end):
+        """Calculate the perpendicular distance from a point to a line."""
+        return np.abs(np.cross(line_end-line_start, line_start-pt)) / np.linalg.norm(line_end-line_start)
+    def rdp(points, epsilon):
+        """Ramer-Douglas-Peucker algorithm to reduce the number of points in a line."""
+        dmax = 0.0
+        index = 0
+        for i in range(1, len(points) - 1):
+            d = perpendicular_distance(points[i], points[0], points[-1])
+            if d > dmax:
+                index, dmax = i, d
+        if dmax >= epsilon:
+            # Recursive call
+            rec_results1 = rdp(points[:index+1], epsilon)
+            rec_results2 = rdp(points[index:], epsilon)
+            # Combine results
+            result = np.concatenate((rec_results1[:-1], rec_results2))
+        else:
+            result = np.array([points[0], points[-1]])
+        return result
+    
+    scan_settings = part.infill_setting.beam_settings
+    bp = obp.Beamparameters(scan_settings.spot_size, scan_settings.beam_power)
+    all_spirals = []
+    offset_distance = part.point_geometry.coord_matrix[1,0,0,0] - part.point_geometry.coord_matrix[0,0,0,0]
+    contours = part.point_geometry.get_contours(layer)
+    all_spirals.append(contours)
+    point_geomtry = part.point_geometry.offset_contours_layer(-offset_distance, layer)
+    part.point_geometry = point_geomtry
+    while np.any(part.point_geometry.keep_matrix[:,:,layer] == 1):
+        contours = part.point_geometry.get_contours(layer)
+        all_spirals.append(contours)
+        point_geomtry = part.point_geometry.offset_contours_layer(-offset_distance, layer)
+        part.point_geometry = point_geomtry
+    contour = flatten_nested_list(all_spirals)
+    points = np.array([[z.real, z.imag] for z in contour])
+    simplified_line = rdp(points, offset_distance*0.9)
+    obp_elements = []
+    for i in range(len(simplified_line)-1):
+        a = obp.Point(simplified_line[i][0]*1000, simplified_line[i][1]*1000)
+        b = obp.Point(simplified_line[i+1][0]*1000, simplified_line[i+1][1]*1000)
+        obp_elements.append(obp.Line(a,b,scan_settings.scan_speed,bp))
+    return obp_elements
+
 def point_random(part, layer):
     coord_matrix, keep_matrix = part.point_geometry.get_layer(layer)
     scan_settings = part.infill_setting.beam_settings

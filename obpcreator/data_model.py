@@ -64,6 +64,19 @@ class PointGeometry(BaseModel):
                     matrix = binary_erosion(matrix)
             keep_matrix[:,:,i] = matrix.astype(int)
         return PointGeometry(coord_matrix=self.coord_matrix, keep_matrix=keep_matrix)
+    def offset_contours_layer(self, offset_distance, layer):
+        point_distance = self.coord_matrix[1,0,0,0] - self.coord_matrix[0,0,0,0]
+        offset_steps = round(offset_distance/point_distance)
+        keep_matrix = copy(self.keep_matrix)
+        matrix = keep_matrix[:,:,layer]
+        if offset_steps > 0:
+            for _ in range(offset_steps):
+                matrix = binary_dilation(matrix)
+        else:
+            for _ in range(abs(offset_steps)):
+                matrix = binary_erosion(matrix)
+        keep_matrix[:,:,layer] = matrix.astype(int)
+        return PointGeometry(coord_matrix=self.coord_matrix, keep_matrix=keep_matrix)
 
 class Infill(BaseModel):
     beam_settings: ScanParameters = None

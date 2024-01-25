@@ -2,7 +2,7 @@ import pyvista as pv
 import obpcreator.support_functions.pv_mesh_manipulation as pv_mesh_manipulation
 from obpcreator import data_model, point_infill_creation, generate_build
 
-mesh1 = pv.Cube(center=(0,0,5), x_length=10, y_length=10, z_length=10)
+mesh1 = pv.Cube(center=(5,5,5), x_length=10, y_length=10, z_length=10)
 meshes = [mesh1]
 
 infill_setting = data_model.ScanParameters(
@@ -13,7 +13,7 @@ infill_setting = data_model.ScanParameters(
     )
 infill = data_model.Infill(
     beam_settings = infill_setting,
-    scan_strategy = "point_random",
+    scan_strategy = "line_spiral_inward",
     strategy_settings = {}
     )
 slice_settings = data_model.SlicingSettings(
