@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "obpcreator"
-version = "0.0.5"
+version = "0.0.7"
 authors = [
     { name = "Anton Wiberg", email = "wiberg.anton@gmail.com" }
 ]
