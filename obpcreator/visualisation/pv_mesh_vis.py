@@ -25,8 +25,5 @@ def vis_pv_mesh(meshes, diameter=100, height=100):
     plotter.add_mesh(build_chamber, color='red', show_edges=False, opacity=0.15)
     for mesh in meshes:
         plotter.add_mesh(mesh)
-        
-        is_closed = mesh.is_all_triangles()
-        print("Mesh:", is_closed)
 
     plotter.show()

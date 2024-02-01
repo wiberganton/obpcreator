@@ -8,8 +8,8 @@ The following scan strategies are supported:
 - `line_snake`: Simple line scanning left-right-left-.., with constant speed.
 - `line_left_right`: Simple line scanning left-right,left-right,.., with constant speed.
 - `line_right_left`: Simple line scanning right-left,right-left,.., with constant speed.
-- `line_spiral_inward` : Moving in a spiral inward with a point_distance distance between each line, with constant speed.
-- `line_spiral_outgoing` : Moving in a spiral from center out with a point_distance distance between each line, with constant speed.
+- `line_spiral` : Moving in a spiral a point_distance distance between each line, with constant speed.
+- `line_concentric` : Moving in full circles along the contour with a point_distance distance between each line, with constant speed.
 - `point_random`: Spot melting with random order of spots.
 - `point_ordered`: Spot melting jumping along the lines with some predefined distance.
 
@@ -22,11 +22,15 @@ no additional settings
 ### line_right_left
 no additional settings
 
-### line_spiral_inward
-no additional settings
+### line_spiral
+| Setting Key | Data Type | Description                                         | Example Value   |
+|-------------|-----------|-----------------------------------------------------|-----------------|
+| direction   | str       | Starting from center out or from outer in (standard)| inward/ outward |
 
-### line_spiral_outgoing
-no additional settings
+### line_concentric
+| Setting Key | Data Type | Description                                         | Example Value   |
+|-------------|-----------|-----------------------------------------------------|-----------------|
+| direction   | str       | Starting from center out or from outer in (standard)| inward/ outward |
 
 ### point_random
 no additional settings

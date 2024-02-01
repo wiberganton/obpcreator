@@ -2,8 +2,8 @@ import pyvista as pv
 import obpcreator.support_functions.pv_mesh_manipulation as pv_mesh_manipulation
 from obpcreator import data_model, point_infill_creation, generate_build
 
-mesh1 = pv.Cube(center=(-15,0,5), x_length=10, y_length=10, z_length=10)
-mesh2 = pv.Cube(center=(15,0,5), x_length=10, y_length=10, z_length=10)
+mesh1 = pv.Cube(center=(0,0,5), x_length=10, y_length=10, z_length=10)
+mesh2 = pv.Cube(center=(0,0,5), x_length=10, y_length=10, z_length=10)
 meshes = [mesh1, mesh2]
 
 # settings order: spot_size, beam_power, scan_speed, dwell_time, scan_strategy, point_distance, rotation_angle

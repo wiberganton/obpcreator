@@ -2,6 +2,7 @@ import obpcreator.scanning_strategies.contour_strategies as contour_strategies
 import obpcreator.scanning_strategies.infill_strategies as infill_strategies
 import obplib as obp
 import copy 
+import sys
 
 def generate_build(build, folder_path):    
     max_layers = get_max_layers(build)
@@ -11,8 +12,9 @@ def generate_build(build, folder_path):
         copied_part = copy.deepcopy(part)
         copied_part.point_geometry = point_geometry
         build_infill.append(copied_part)
-
     for i in range(max_layers):
+        sys.stdout.write(f'\rPath planning layer {i+1}/{max_layers}')  # Print the message
+        sys.stdout.flush()  # Ensure the message is displayed
         layer_obp_elements = []
         for ii in range(len(build.parts)):
             if build.parts[ii].point_geometry.keep_matrix.shape[2]>i:

@@ -4,6 +4,8 @@ from numpy import copy
 from scipy.ndimage import binary_dilation, binary_erosion
 import cv2
 import math
+from shapely.geometry import Polygon
+
 
 class ScanParameters(BaseModel):
     spot_size: int = 1 #[-] 1-100
@@ -37,19 +39,26 @@ class PointGeometry(BaseModel):
         return coords, self.keep_matrix[:,:,layer] 
     def get_contours(self, layer):
         matrix = self.keep_matrix[:,:,layer]
-        #binary_image = np.uint8(matrix)
+        coords = self.coord_matrix[:,:,layer,:]
         contours, _ = cv2.findContours(matrix, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        grouped_edges = [contour[:, 0, :] for contour in contours]
-
-        extracted_values = []
-        x_coords = self.coord_matrix[:, :, layer, 0]
-        y_coords = self.coord_matrix[:, :, layer, 1]
-        coords = x_coords + 1j * y_coords
-        for contour in grouped_edges:
-            # Extract values for each contour
-            contour_values = [coords[row, col] for row, col in contour]
-            extracted_values.append(contour_values)
-        return extracted_values
+        simplified_contours = []
+        epsilon_factor = (self.coord_matrix[1,0,0,0] - self.coord_matrix[0,0,0,0])*1.0 #Simplification factor
+        for cnt in contours:
+            epsilon = epsilon_factor * cv2.arcLength(cnt, True)
+            approx = cv2.approxPolyDP(cnt, epsilon, True)
+            # Initialize an empty list to hold the mapped real-world coordinates for this contour
+            real_world_contour_points = []
+            for point in approx.reshape(-1, 2):
+                # Map the pixel positions to real-world coordinates
+                # Ensure to convert point indices to integers, as they will be used as indices
+                x_pixel, y_pixel = point.astype(int)
+                real_world_x, real_world_y = coords[y_pixel, x_pixel, 0], coords[y_pixel, x_pixel, 1]
+                real_world_contour_points.append((real_world_x, real_world_y))
+            
+            # Create a Shapely Polygon with the real-world coordinates
+            polygon = Polygon(real_world_contour_points)
+            simplified_contours.append(polygon)
+        return simplified_contours
     def offset_contours(self, offset_distance):
         point_distance = self.coord_matrix[1,0,0,0] - self.coord_matrix[0,0,0,0]
         offset_steps = round(offset_distance/point_distance)

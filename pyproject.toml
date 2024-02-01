@@ -30,5 +30,6 @@ dependencies = [
     "pytest",
     "opencv-python",
     "scipy",
+    "logbook",
 ]
 requires-python = ">=3.7"
