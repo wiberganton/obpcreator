@@ -11,50 +11,20 @@ class SimpleBuild(BaseModel):
     beam_power: List[int] #[W]
     scan_speed: List[int] #[micrometers/second]
     dwell_time: List[int] #[ns]
-    scan_strategy: List[str]
-    point_distance: List[float] #[mm]
-    scan_settings: List[dict] = [{}]
+    infill_strategy: List[str]
+    infill_point_distance: List[float] #[mm]
+    infill_settings: List[dict] = [{}]
     rotation_angle: List[float] = [0] #[deg]
     layer_height: float #[mm]
     bse_step: int = 0
     bse_melt: bool = False
-    @root_validator(pre=True)
-    def initial_processing(cls, values):
-        meshes = values.get('meshes')
-        spot_size = values.get('spot_size')
-        beam_power = values.get('beam_power')
-        scan_speed = values.get('scan_speed')
-        dwell_time = values.get('dwell_time')
-        scan_strategy = values.get('scan_strategy')
-        point_distance = values.get('point_distance')
-        scan_settings = values.get('scan_settings')
-        rotation_angle = values.get('rotation_angle')
-        if spot_size is not None:
-            if not (len(spot_size) == 1 or len(spot_size)==len(meshes)):
-                raise ValueError('Length of spot_size is wrong')
-        if beam_power is not None:
-            if not (len(beam_power) == 1 or len(beam_power)==len(meshes)):
-                raise ValueError('Length of beam_power is wrong')
-        if scan_speed is not None:
-            if not (len(scan_speed) == 1 or len(scan_speed)==len(meshes)):
-                raise ValueError('Length of scan_speed is wrong')
-        if dwell_time is not None:
-            if not (len(dwell_time) == 1 or len(dwell_time)==len(meshes)):
-                raise ValueError('Length of dwell_time is wrong')
-        if scan_strategy is not None:
-            if not (len(scan_strategy) == 1 or len(scan_strategy)==len(meshes)):
-                raise ValueError('Length of scan_strategy is wrong')
-        if point_distance is not None:
-            if not (len(point_distance) == 1 or len(point_distance)==len(meshes)):
-                raise ValueError('Length of point_distance is wrong')
-        if scan_settings is not None:
-            if not (len(scan_settings) == 1 or len(scan_settings)==len(meshes)):
-                raise ValueError('Length of scan_settings is wrong')
-        if rotation_angle is not None:
-            if not (len(rotation_angle) == 1 or len(rotation_angle)==len(meshes)):
-                raise ValueError('Length of rotation_angle is wrong')
+    contour_strategy: List[str] = []
+    contour_settings: List[dict] = []
+    contour_spot_size: List[int] = [] #[-] 1-100
+    contour_beam_power: List[int] = [] #[W]
+    contour_scan_speed: List[int] = [] #[micrometers/second]
+    contour_dwell_time: List[int] = [] #[ns]
 
-        return values
     def prepare_build(self, out_path):
         vis_pv_mesh(self.meshes, diameter=100, height=100)
         value = messagebox.askokcancel(title=None, message="Do you want to continue with the build preperation?")
@@ -69,12 +39,12 @@ class SimpleBuild(BaseModel):
             self.scan_speed = self.scan_speed*wanted_len
         if len(self.dwell_time)==1 and wanted_len!=1:
             self.dwell_time = self.dwell_time*wanted_len
-        if len(self.scan_strategy)==1 and wanted_len!=1:
-            self.scan_strategy = self.scan_strategy*wanted_len
-        if len(self.point_distance)==1 and wanted_len!=1:
-            self.point_distance = self.point_distance*wanted_len
-        if len(self.scan_settings)==1 and wanted_len!=1:
-            self.scan_settings = self.scan_settings*wanted_len
+        if len(self.infill_strategy)==1 and wanted_len!=1:
+            self.infill_strategy = self.infill_strategy*wanted_len
+        if len(self.infill_point_distance)==1 and wanted_len!=1:
+            self.infill_point_distance = self.infill_point_distance*wanted_len
+        if len(self.infill_settings)==1 and wanted_len!=1:
+            self.infill_settings = self.infill_settings*wanted_len
         if len(self.rotation_angle)==1 and wanted_len!=1:
             self.rotation_angle = self.rotation_angle*wanted_len
         
@@ -85,7 +55,7 @@ class SimpleBuild(BaseModel):
             sys.stdout.write(f'\rSlicing part {i+1}/{len(self.meshes)}')  # Print the message
             sys.stdout.flush()  # Ensure the message is displayed
             slice_settings = data_model.SlicingSettings(
-                point_distance = self.point_distance[i],  #mm
+                point_distance = self.infill_point_distance[i],  #mm
                 layer_height = self.layer_height, #mm
                 rotation_angle = self.rotation_angle[i] #deg 
             )
@@ -98,13 +68,34 @@ class SimpleBuild(BaseModel):
             )
             infill = data_model.Infill(
                 beam_settings = infill_setting,
-                scan_strategy = self.scan_strategy[i],
-                strategy_settings = self.scan_settings[i]
+                scan_strategy = self.infill_strategy[i],
+                strategy_settings = self.infill_settings[i]
                 )
-            part1 = data_model.Part(
-                point_geometry = point_geometry,
-                infill_setting = infill
-            )
+            if len(self.contour_strategy) > 0:
+                contour_setting = data_model.ScanParameters(
+                    spot_size = self.contour_spot_size[i], #[-] 1-100
+                    beam_power = self.contour_beam_power[i], #[W]
+                    scan_speed = self.contour_scan_speed[i], #[micrometers/second]
+                    dwell_time = self.contour_dwell_time[i], #[ns]
+                    )
+                contour = data_model.Contour(
+                    beam_settings = contour_setting,
+                    scan_strategy = self.contour_strategy[i],
+                    strategy_settings = self.contour_settings[i],
+                    numb_of_layers = 1,
+                    outer_offset = 0,
+                    contour_offset = 0
+                    )
+                part1 = data_model.Part(
+                    point_geometry = point_geometry,
+                    infill_setting = infill,
+                    contour_setting = contour
+                )
+            else: 
+                part1 = data_model.Part(
+                    point_geometry = point_geometry,
+                    infill_setting = infill,
+                )
             parts.append(part1)
         bse = data_model.BackScatter(
             file="BSE_Scan_PT.obp",
@@ -119,22 +110,3 @@ class SimpleBuild(BaseModel):
         generate_build.generate_build(build, out_path)
    
 
-import pyvista as pv
-
-cube1 = pv.Cube(center=(10,-10,5),x_length=10,y_length=10,z_length=10)
-cube2 = pv.Cube(center=(10,10,5),x_length=10,y_length=10,z_length=10)
-cube3 = pv.Cube(center=(-10,-10,5),x_length=10,y_length=10,z_length=10)
-cube4 = pv.Cube(center=(-10,10,5),x_length=10,y_length=10,z_length=10)
-
-build = SimpleBuild(
-    meshes = [cube1, cube2, cube3, cube4],
-    spot_size = [1],
-    beam_power = [660],
-    scan_speed = [2031000],
-    dwell_time = [515000],
-    scan_strategy = ["line_concentric", "line_concentric", "line_spiral", "line_spiral"],
-    scan_settings = [{'direction': 'inward'}, {'direction': 'outward'},{'direction': 'inward'}, {'direction': 'outward'}],
-    point_distance = [0.1],
-    layer_height = 0.1,
-    rotation_angle = [90])
-build.prepare_build(r"C:\Users\antwi87\Downloads\slicerTest2")

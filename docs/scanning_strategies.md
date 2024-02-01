@@ -45,9 +45,16 @@ no additional settings
 ## Contour strategies
 The following scan strategies are supported:
 - `line_simple`: Simple line scanning, with constant speed.
+- `point_simple`: Simple spot scanning.
 
 ### line_simple
 no additional settings
+
+### point_simple
+| Setting Key | Data Type | Description                                           | Example Value |
+|-------------|-----------|-------------------------------------------------------|---------------|
+| step        | float     | mm distance between points                            | 0.1           |
+| jump        | int       | Jumps done between each circulation (standard = 1)    | 5             |
 
 
 Please ensure you use the correct settings for the selected scan strategy. Providing incorrect or invalid settings may result in unexpected behavior or errors.

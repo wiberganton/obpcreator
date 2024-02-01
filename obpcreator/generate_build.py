@@ -92,14 +92,16 @@ def generate_build_file(build, path):
     f.close()
 
 def generate_contour(part, layer):
-    strategy_func = getattr(contour_strategies, part.contour_settings.scan_strategy, None)
+    strategy_func = getattr(contour_strategies, part.contour_setting.scan_strategy, None)
     if strategy_func:
-        return []
+        return strategy_func(part, layer)
         #return strategy_func(paths, scan_settings)
     else:
-        print(f"No function named {part.contour_settings.scan_strategy} exists")
+        print(f"No function named {part.contour_setting.scan_strategy} exists")
 
 def generate_infill(part, layer):
+    if part.infill_setting.scan_strategy == "":
+        return []
     strategy_func = getattr(infill_strategies, part.infill_setting.scan_strategy, None)
     if strategy_func:
         return strategy_func(part, layer)
