@@ -121,15 +121,19 @@ class SimpleBuild(BaseModel):
 
 import pyvista as pv
 
+cube1 = pv.Cube(center=(10,-10,5),x_length=10,y_length=10,z_length=10)
+cube2 = pv.Cube(center=(10,10,5),x_length=10,y_length=10,z_length=10)
+cube3 = pv.Cube(center=(-10,-10,5),x_length=10,y_length=10,z_length=10)
+cube4 = pv.Cube(center=(-10,10,5),x_length=10,y_length=10,z_length=10)
 
 build = SimpleBuild(
-    meshes = [pv.Cube(center=(0,0,5),x_length=10,y_length=10,z_length=10), pv.Cube(center=(0,20,5),x_length=10,y_length=10,z_length=10)],
+    meshes = [cube1, cube2, cube3, cube4],
     spot_size = [1],
     beam_power = [660],
     scan_speed = [2031000],
     dwell_time = [515000],
-    scan_strategy = ["line_concentric"],
-    scan_settings = [{'direction': 'inward'}, {'direction': 'outward'}],
+    scan_strategy = ["line_concentric", "line_concentric", "line_spiral", "line_spiral"],
+    scan_settings = [{'direction': 'inward'}, {'direction': 'outward'},{'direction': 'inward'}, {'direction': 'outward'}],
     point_distance = [0.1],
     layer_height = 0.1,
     rotation_angle = [90])

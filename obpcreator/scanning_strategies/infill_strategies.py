@@ -116,12 +116,49 @@ def line_concentric(part, layer):
     return obp_elements
 
 def line_spiral(part, layer):
+    def find_point(x1, y1, x2, y2, d):
+        # Finding the point on the distance d from from x1, y1 in the direction towards x2, y2
+        direction_vector = np.array([x2 - x1, y2 - y1])
+        unit_vector = direction_vector / np.linalg.norm(direction_vector)
+        scaled_vector = unit_vector * d
+        x3, y3 = np.array([x1, y1]) + scaled_vector
+        return x3, y3
+    scan_strategy_settings = part.infill_setting.strategy_settings
+    inward = True
+    if 'direction' in scan_strategy_settings:
+        if scan_strategy_settings['direction'] == 'outward':
+            inward = False
     scan_settings = part.infill_setting.beam_settings
     bp = obp.Beamparameters(scan_settings.spot_size, scan_settings.beam_power)
-    all_spirals = []
     offset_distance = part.point_geometry.coord_matrix[1,0,0,0] - part.point_geometry.coord_matrix[0,0,0,0]
     contours = part.point_geometry.get_contours(layer)
-    all_spirals.append(contours)
+    obp_elements = []
+    for contour in contours:
+        line = contour
+        first = True
+        x_end, y_end = 0, 0
+        while not line.is_empty:
+            x, y = line.exterior.xy
+            if first:
+                x_start, y_start = x[0], y[0]
+                first = False
+            else: 
+                x_start, y_start = x_end, y_end
+            x_end, y_end = find_point(x[-1], y[-1], x[-2], y[-2], offset_distance)
+            x[0], y[0] = x_start, y_start
+            x[-1], y[-1] = x_end, y_end
+            for i in range(len(x)-1):
+                if inward:
+                    a = obp.Point(x[i]*1000, y[i]*1000)
+                    b = obp.Point(x[i+1]*1000, y[i+1]*1000)
+                else:
+                    b = obp.Point(x[i]*1000, y[i]*1000)
+                    a = obp.Point(x[i+1]*1000, y[i+1]*1000)
+                obp_elements.append(obp.Line(a,b,scan_settings.scan_speed,bp))
+            line = line.buffer(-offset_distance)
+    if inward:
+        obp_elements = obp_elements[::-1]
+    return obp_elements
 
 def point_random(part, layer):
     coord_matrix, keep_matrix = part.point_geometry.get_layer(layer)
