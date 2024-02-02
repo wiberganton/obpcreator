@@ -25,11 +25,12 @@ class SimpleBuild(BaseModel):
     contour_scan_speed: List[int] = [] #[micrometers/second]
     contour_dwell_time: List[int] = [] #[ns]
 
-    def prepare_build(self, out_path):
-        vis_pv_mesh(self.meshes, diameter=100, height=100)
-        value = messagebox.askokcancel(title=None, message="Do you want to continue with the build preperation?")
-        if not value:
-            return
+    def prepare_build(self, out_path, gui=True):
+        if gui:
+            vis_pv_mesh(self.meshes, diameter=100, height=100)
+            value = messagebox.askokcancel(title=None, message="Do you want to continue with the build preperation?")
+            if not value:
+                return
         wanted_len = len(self.meshes)
         if len(self.spot_size)==1 and wanted_len!=1:
             self.spot_size = self.spot_size*wanted_len
