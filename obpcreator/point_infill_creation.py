@@ -30,7 +30,7 @@ def rotate_point(x, y, theta, center_x, center_y):
     y_new = sin_theta * (x - center_x) + cos_theta * (y - center_y) + center_y
     return x_new, y_new
 
-def generate_matrices(min_x, max_x, min_y, max_y, max_z, xy_spacing, z_spacing, start_angle=0, rotation_angle=0, uniform_point_dist=True, offset_margin=3):
+def generate_matrices(min_x, max_x, min_y, max_y, max_z, xy_spacing, z_spacing, start_angle=0, rotation_angle=0, uniform_point_dist=True, offset_margin=1):
     center = [(max_x+min_x)/2, (max_y+min_y)/2]
     longest_side = max(abs(max_x-min_x),abs(max_y-min_y))/2+2*offset_margin
     min_x = center[0]-math.sqrt(2)*longest_side
@@ -65,7 +65,7 @@ def generate_matrices(min_x, max_x, min_y, max_y, max_z, xy_spacing, z_spacing, 
     keep_matrix = np.zeros(combined_coords.shape[:-1])
 
     return combined_coords, keep_matrix
-    
+
 
 def create_from_pyvista_mesh(mesh, slicing_settings):
     xy_spacing = slicing_settings.point_distance
@@ -84,8 +84,10 @@ def create_from_pyvista_mesh(mesh, slicing_settings):
     # Check keep matrix
     reshaped_coords = combined_coords.reshape(-1, 3)
     point_cloud = pv.PolyData(reshaped_coords)
-    inside_points = point_cloud.select_enclosed_points(mesh, tolerance=0.0, check_surface=True)
+    inside_points = point_cloud.select_enclosed_points(mesh, tolerance=0.0, check_surface=False)
     keep_list = inside_points['SelectedPoints']
     keep_matrix = keep_list.reshape(combined_coords.shape[:-1])
 
     return PointGeometry(coord_matrix=combined_coords, keep_matrix=keep_matrix)
+
+
