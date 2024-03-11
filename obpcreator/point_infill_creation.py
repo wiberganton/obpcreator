@@ -1,6 +1,7 @@
 import math 
 import numpy as np
 import pyvista as pv
+from shapely.geometry import Polygon, MultiPolygon, Point
 
 from obpcreator.data_model import PointGeometry
 
@@ -90,4 +91,59 @@ def create_from_pyvista_mesh(mesh, slicing_settings):
 
     return PointGeometry(coord_matrix=combined_coords, keep_matrix=keep_matrix)
 
+def create_from_pyvista_mesh2(mesh, slicing_settings):
+    xy_spacing = slicing_settings.point_distance
+    z_spacing = slicing_settings.layer_height
+    start_angle = slicing_settings.start_angle
+    rotation_angle = slicing_settings.rotation_angle
+    uniform_point_dist = slicing_settings.uniform_point_dist
+    offset_margin = slicing_settings.offset_margin
+    points = mesh.points
+    # Find min and max for each coordinate
+    x_min, x_max = np.min(points[:, 0]), np.max(points[:, 0])
+    y_min, y_max = np.min(points[:, 1]), np.max(points[:, 1])
+    z_min, z_max = np.min(points[:, 2]), np.max(points[:, 2])
+    combined_coords, keep_matrix = generate_matrices(x_min, x_max, y_min, y_max, z_max, xy_spacing, z_spacing, start_angle=start_angle, rotation_angle=rotation_angle, uniform_point_dist=uniform_point_dist, offset_margin=offset_margin)
 
+    for i in range(keep_matrix.shape[2]):
+        for ii in range(keep_matrix.shape[1]):
+            # Two points defining the line (ray)
+            p1 = combined_coords[0,ii,i]
+            p2 = combined_coords[-1,ii,i]
+
+            points, ind = mesh.ray_trace(p1, p2)
+            
+            row_combined_coords = np.array(combined_coords[:,ii,i,0])
+            for iii in range(0,len(points)-1,2):
+                mask = (row_combined_coords >= points[iii][0]) & (row_combined_coords <= points[iii+1][0])
+                indices = np.where(mask)[0]
+                keep_matrix[indices,ii,i] = 1
+
+    return PointGeometry(coord_matrix=combined_coords, keep_matrix=keep_matrix)
+
+
+def create_from_pyvista_mesh3(mesh, slicing_settings):
+    xy_spacing = slicing_settings.point_distance
+    z_spacing = slicing_settings.layer_height
+    start_angle = slicing_settings.start_angle
+    rotation_angle = slicing_settings.rotation_angle
+    uniform_point_dist = slicing_settings.uniform_point_dist
+    offset_margin = slicing_settings.offset_margin
+    points = mesh.points
+    # Find min and max for each coordinate
+    x_min, x_max = np.min(points[:, 0]), np.max(points[:, 0])
+    y_min, y_max = np.min(points[:, 1]), np.max(points[:, 1])
+    z_min, z_max = np.min(points[:, 2]), np.max(points[:, 2])
+    combined_coords, keep_matrix = generate_matrices(x_min, x_max, y_min, y_max, z_max, xy_spacing, z_spacing, start_angle=start_angle, rotation_angle=rotation_angle, uniform_point_dist=uniform_point_dist, offset_margin=offset_margin)
+
+    # Check keep matrix
+    for i in range(keep_matrix.shape[2]):
+        z_pos = combined_coords[0,0,i,2]
+        reshaped_coords = combined_coords[:,:,i].reshape(-1, 3)
+        point_cloud = pv.PolyData(reshaped_coords)
+        single_slice = mesh.slice(normal=[0, 0, 1], origin=(0, 0, z_pos))
+        inside_points = point_cloud.select_enclosed_points(single_slice, tolerance=0.1, check_surface=False)
+        keep_list = inside_points['SelectedPoints']
+        keep_matrix[:,:,i] = keep_list.reshape(combined_coords[:,:,i].shape[:-1])
+
+    return PointGeometry(coord_matrix=combined_coords, keep_matrix=keep_matrix)
