@@ -103,7 +103,7 @@ def line_concentric(part, layer):
         while not line.is_empty:
             x, y = line.exterior.xy
             for i in range(len(x)-1):
-                if inward:
+                if not inward:
                     a = obp.Point(x[i]*1000, y[i]*1000)
                     b = obp.Point(x[i+1]*1000, y[i+1]*1000)
                 else:
@@ -111,7 +111,7 @@ def line_concentric(part, layer):
                     a = obp.Point(x[i+1]*1000, y[i+1]*1000)
                 obp_elements.append(obp.Line(a,b,scan_settings.scan_speed,bp))
             line = line.buffer(-offset_distance)
-    if inward:
+    if not inward:
         obp_elements = obp_elements[::-1]
     return obp_elements
 
@@ -148,7 +148,7 @@ def line_spiral(part, layer):
             x[0], y[0] = x_start, y_start
             x[-1], y[-1] = x_end, y_end
             for i in range(len(x)-1):
-                if inward:
+                if not inward:
                     a = obp.Point(x[i]*1000, y[i]*1000)
                     b = obp.Point(x[i+1]*1000, y[i+1]*1000)
                 else:
@@ -156,7 +156,7 @@ def line_spiral(part, layer):
                     a = obp.Point(x[i+1]*1000, y[i+1]*1000)
                 obp_elements.append(obp.Line(a,b,scan_settings.scan_speed,bp))
             line = line.buffer(-offset_distance)
-    if inward:
+    if not inward:
         obp_elements = obp_elements[::-1]
     return obp_elements
 
