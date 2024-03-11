@@ -32,6 +32,11 @@ class SlicingSettings(BaseModel):
 class PointGeometry(BaseModel):
     coord_matrix: Any #3D numpy matrix with the coords of the points as complex numbers in mm
     keep_matrix: Any #3D numpy matrix with which points to manufacture
+    def get_point_distance(self):
+        coord1 = self.coord_matrix[1,0,0,0:2]
+        coord2 = self.coord_matrix[0,0,0,0:2]
+        distance = math.sqrt((coord2[0] - coord1[0]) ** 2 + (coord2[1] - coord1[1]) ** 2)
+        return distance
     def get_layer(self, layer):
         x_coords = self.coord_matrix[:, :, layer, 0]
         y_coords = self.coord_matrix[:, :, layer, 1]
@@ -60,7 +65,7 @@ class PointGeometry(BaseModel):
             simplified_contours.append(polygon)
         return simplified_contours
     def offset_contours(self, offset_distance):
-        point_distance = self.coord_matrix[1,0,0,0] - self.coord_matrix[0,0,0,0]
+        point_distance = self.get_point_distance()
         offset_steps = round(offset_distance/point_distance)
         keep_matrix = copy(self.keep_matrix)
         for i in range(keep_matrix.shape[2]):

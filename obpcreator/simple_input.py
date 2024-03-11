@@ -14,8 +14,10 @@ class SimpleBuild(BaseModel):
     infill_strategy: List[str]
     infill_point_distance: List[float] #[mm]
     infill_settings: List[dict] = [{}]
-    rotation_angle: List[float] = [0] #[deg]
     layer_height: float #[mm]
+
+    start_angle: List[float] = [0] #[deg]
+    rotation_angle: List[float] = [0] #[deg]
     bse_step: int = 0
     bse_melt: bool = False
     contour_strategy: List[str] = []
@@ -32,23 +34,10 @@ class SimpleBuild(BaseModel):
             if not value:
                 return
         wanted_len = len(self.meshes)
-        if len(self.spot_size)==1 and wanted_len!=1:
-            self.spot_size = self.spot_size*wanted_len
-        if len(self.beam_power)==1 and wanted_len!=1:
-            self.beam_power = self.beam_power*wanted_len
-        if len(self.scan_speed)==1 and wanted_len!=1:
-            self.scan_speed = self.scan_speed*wanted_len
-        if len(self.dwell_time)==1 and wanted_len!=1:
-            self.dwell_time = self.dwell_time*wanted_len
-        if len(self.infill_strategy)==1 and wanted_len!=1:
-            self.infill_strategy = self.infill_strategy*wanted_len
-        if len(self.infill_point_distance)==1 and wanted_len!=1:
-            self.infill_point_distance = self.infill_point_distance*wanted_len
-        if len(self.infill_settings)==1 and wanted_len!=1:
-            self.infill_settings = self.infill_settings*wanted_len
-        if len(self.rotation_angle)==1 and wanted_len!=1:
-            self.rotation_angle = self.rotation_angle*wanted_len
-        
+        attributes = ['spot_size', 'beam_power', 'scan_speed', 'dwell_time', 'infill_strategy', 'infill_point_distance', 'infill_settings', 'rotation_angle', 'start_angle']
+        for attr in attributes:
+            if len(getattr(self, attr)) == 1 and wanted_len != 1:
+                setattr(self, attr, getattr(self, attr) * wanted_len)
         parts = []
         sys.stdout.write(f'Slicing parts')  # Print the message
         sys.stdout.flush()  # Ensure the message is displayed
@@ -58,7 +47,8 @@ class SimpleBuild(BaseModel):
             slice_settings = data_model.SlicingSettings(
                 point_distance = self.infill_point_distance[i],  #mm
                 layer_height = self.layer_height, #mm
-                rotation_angle = self.rotation_angle[i] #deg 
+                rotation_angle = self.rotation_angle[i], #deg
+                start_angle = self.start_angle[i] #deg
             )
             point_geometry = point_infill_creation.create_from_pyvista_mesh(self.meshes[i], slice_settings)
             infill_setting = data_model.ScanParameters(
