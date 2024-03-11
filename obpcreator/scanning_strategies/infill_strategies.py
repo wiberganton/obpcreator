@@ -57,7 +57,7 @@ def line_left_right(part, layer):
         start_coord = coord_matrix[left[i][0]][left[i][1]]
         end_coord = coord_matrix[right[i][0]][right[i][1]]
         if start_coord==end_coord:
-            obp.Point(start_coord.real*1000, start_coord.imag*1000)
+            a = obp.Point(start_coord.real*1000, start_coord.imag*1000)
             obp_elements.append(obp.TimedPoints([a], [scan_settings.dwell_time], bp))
         else:
             a = obp.Point(start_coord.real*1000, start_coord.imag*1000)
