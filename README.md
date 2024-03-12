@@ -40,6 +40,6 @@ build.prepare_build(r"C:\Users\antwi87\Downloads\slicerTest2")
 
 # To package
 - Delete old builds in the \dist folder 
-- Update the version in the setup.cfg file
+- Update the version in the pyproject.toml file
 - run "python -m build"
 - upload to pip with "twine upload dist/*"

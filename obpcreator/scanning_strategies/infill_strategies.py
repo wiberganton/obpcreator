@@ -27,6 +27,11 @@ def right_sort(t):
     return (t[0], -t[1])
     
 def line_snake(part, layer):
+    scan_strategy_settings = part.infill_setting.strategy_settings
+    short_as_point = False
+    if 'short_as_point' in scan_strategy_settings:
+        if scan_strategy_settings['short_as_point'] == 'true':
+            short_as_point = True
     coord_matrix, keep_matrix = part.point_geometry.get_layer(layer)
     scan_settings = part.infill_setting.beam_settings
     left, right = find_start_end_line_positions(keep_matrix)
@@ -38,9 +43,10 @@ def line_snake(part, layer):
         start_coord = coord_matrix[snake_sorted_left[i][0]][snake_sorted_left[i][1]]
         end_coord = coord_matrix[snake_sorted_right[i][0]][snake_sorted_right[i][1]]
         if start_coord==end_coord:
-            a = obp.Point(start_coord.real*1000, start_coord.imag*1000)
-            obp.Point(start_coord.real*1000, start_coord.imag*1000)
-            obp_elements.append(obp.TimedPoints([a], [scan_settings.dwell_time], bp))
+            if short_as_point:
+                a = obp.Point(start_coord.real*1000, start_coord.imag*1000)
+                obp.Point(start_coord.real*1000, start_coord.imag*1000)
+                obp_elements.append(obp.TimedPoints([a], [scan_settings.dwell_time], bp))
         else:
             a = obp.Point(start_coord.real*1000, start_coord.imag*1000)
             b = obp.Point(end_coord.real*1000, end_coord.imag*1000)
@@ -48,6 +54,11 @@ def line_snake(part, layer):
     return obp_elements
 
 def line_left_right(part, layer):
+    scan_strategy_settings = part.infill_setting.strategy_settings
+    short_as_point = False
+    if 'short_as_point' in scan_strategy_settings:
+        if scan_strategy_settings['short_as_point'] == 'true':
+            short_as_point = True
     coord_matrix, keep_matrix = part.point_geometry.get_layer(layer)
     scan_settings = part.infill_setting.beam_settings
     left, right = find_start_end_line_positions(keep_matrix)
@@ -57,8 +68,9 @@ def line_left_right(part, layer):
         start_coord = coord_matrix[left[i][0]][left[i][1]]
         end_coord = coord_matrix[right[i][0]][right[i][1]]
         if start_coord==end_coord:
-            a = obp.Point(start_coord.real*1000, start_coord.imag*1000)
-            obp_elements.append(obp.TimedPoints([a], [scan_settings.dwell_time], bp))
+            if short_as_point:
+                a = obp.Point(start_coord.real*1000, start_coord.imag*1000)
+                obp_elements.append(obp.TimedPoints([a], [scan_settings.dwell_time], bp))
         else:
             a = obp.Point(start_coord.real*1000, start_coord.imag*1000)
             b = obp.Point(end_coord.real*1000, end_coord.imag*1000)
@@ -66,6 +78,11 @@ def line_left_right(part, layer):
     return obp_elements
 
 def line_right_left(part, layer):
+    scan_strategy_settings = part.infill_setting.strategy_settings
+    short_as_point = False
+    if 'short_as_point' in scan_strategy_settings:
+        if scan_strategy_settings['short_as_point'] == 'true':
+            short_as_point = True
     coord_matrix, keep_matrix = part.point_geometry.get_layer(layer)
     scan_settings = part.infill_setting.beam_settings
     left, right = find_start_end_line_positions(keep_matrix)
@@ -77,8 +94,9 @@ def line_right_left(part, layer):
         start_coord = coord_matrix[snake_sorted_left[i][0]][snake_sorted_left[i][1]]
         end_coord = coord_matrix[snake_sorted_right[i][0]][snake_sorted_right[i][1]]
         if start_coord==end_coord:
-            a = obp.Point(start_coord.real*1000, start_coord.imag*1000)
-            obp_elements.append(obp.TimedPoints([a], [scan_settings.dwell_time], bp))
+            if short_as_point:
+                a = obp.Point(start_coord.real*1000, start_coord.imag*1000)
+                obp_elements.append(obp.TimedPoints([a], [scan_settings.dwell_time], bp))
         else:
             a = obp.Point(start_coord.real*1000, start_coord.imag*1000)
             b = obp.Point(end_coord.real*1000, end_coord.imag*1000)

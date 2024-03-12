@@ -23,4 +23,4 @@ build = SimpleBuild(
     layer_height = 0.1,
     rotation_angle = [0],
     )
-build.prepare_build(r"C:\Users\antwi87\Downloads\slicerTest2")
+build.prepare_build(r"C:\Users\antwi87\Downloads\slicertest5")

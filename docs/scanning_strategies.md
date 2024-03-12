@@ -14,13 +14,19 @@ The following scan strategies are supported:
 - `point_ordered`: Spot melting jumping along the lines with some predefined distance.
 
 ### line_snake
-no additional settings
+|  Setting Key   | Data Type | Description                                                          | Example Value   |
+|----------------|-----------|----------------------------------------------------------------------|-----------------|
+| short_as_point | str       | If short segements should be manufactured as points (standard false) | true/ false     |
 
 ### line_left_right
-no additional settings
+|  Setting Key   | Data Type | Description                                                          | Example Value   |
+|----------------|-----------|----------------------------------------------------------------------|-----------------|
+| short_as_point | str       | If short segements should be manufactured as points (standard false) | true/ false     |
 
 ### line_right_left
-no additional settings
+|  Setting Key   | Data Type | Description                                                          | Example Value   |
+|----------------|-----------|----------------------------------------------------------------------|-----------------|
+| short_as_point | str       | If short segements should be manufactured as points (standard false) | true/ false     |
 
 ### line_spiral
 | Setting Key | Data Type | Description                                         | Example Value   |
