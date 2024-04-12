@@ -26,6 +26,7 @@ class SimpleBuild(BaseModel):
     contour_beam_power: List[int] = [] #[W]
     contour_scan_speed: List[int] = [] #[micrometers/second]
     contour_dwell_time: List[int] = [] #[ns]
+    contour_order: List[int] = [1] #0=contours before infill, 1=contours after  infill, 2=both before and after infill
 
     def prepare_build(self, out_path, gui=True):
         if gui:
@@ -34,7 +35,7 @@ class SimpleBuild(BaseModel):
             if not value:
                 return
         wanted_len = len(self.meshes)
-        attributes = ['spot_size', 'beam_power', 'scan_speed', 'dwell_time', 'infill_strategy', 'infill_point_distance', 'infill_settings', 'rotation_angle', 'start_angle']
+        attributes = ['spot_size', 'beam_power', 'scan_speed', 'dwell_time', 'infill_strategy', 'infill_point_distance', 'infill_settings', 'rotation_angle', 'start_angle', 'contour_order']
         for attr in attributes:
             if len(getattr(self, attr)) == 1 and wanted_len != 1:
                 setattr(self, attr, getattr(self, attr) * wanted_len)
@@ -80,7 +81,8 @@ class SimpleBuild(BaseModel):
                 part1 = data_model.Part(
                     point_geometry = point_geometry,
                     infill_setting = infill,
-                    contour_setting = contour
+                    contour_setting = contour,
+                    contour_order = self.contour_order[i],
                 )
             else: 
                 part1 = data_model.Part(

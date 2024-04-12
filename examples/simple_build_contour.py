@@ -3,8 +3,6 @@ import pyvista as pv
 
 cube1 = pv.Cube(center=(10,-10,5),x_length=10,y_length=10,z_length=10)
 cube2 = pv.Cube(center=(10,10,5),x_length=10,y_length=10,z_length=10)
-cube3 = pv.Cube(center=(-10,-10,5),x_length=10,y_length=10,z_length=10)
-cube4 = pv.Cube(center=(-10,10,5),x_length=10,y_length=10,z_length=10)
 
 build = SimpleBuild(
     meshes = [cube1, cube2],
@@ -12,7 +10,7 @@ build = SimpleBuild(
     beam_power = [660],
     scan_speed = [2031000],
     dwell_time = [515000],
-    infill_strategy = [""],
+    infill_strategy = ["point_random"],
     infill_settings = [{}],
     infill_point_distance = [0.1],
     layer_height = 0.1,
@@ -22,6 +20,7 @@ build = SimpleBuild(
     contour_spot_size = [1,1], #[-] 1-100
     contour_beam_power = [660,660] ,#[W]
     contour_scan_speed = [2031000,2031000] ,#[micrometers/second]
-    contour_dwell_time = [515000,515000] #[ns]
+    contour_dwell_time = [515000,515000], #[ns],
+    contour_order = [0,1], #0=contours before infill, 1=contours after  infill, 2=both before and after infill
     )
 build.prepare_build(r"C:\Users\antwi87\Downloads\slicerTest2")
