@@ -29,6 +29,7 @@ class SlicingSettings(BaseModel):
             data['hatch_distance'] = data['point_distance']*math.sqrt(3/4)
         super().__init__(**data)
 
+
 class PointGeometry(BaseModel):
     coord_matrix: Any #3D numpy matrix with the coords of the points as complex numbers in mm
     keep_matrix: Any #3D numpy matrix with which points to manufacture
@@ -91,6 +92,8 @@ class PointGeometry(BaseModel):
                 matrix = binary_erosion(matrix)
         keep_matrix[:,:,layer] = matrix.astype(int)
         return PointGeometry(coord_matrix=self.coord_matrix, keep_matrix=keep_matrix)
+
+
 
 class Infill(BaseModel):
     beam_settings: ScanParameters = None
