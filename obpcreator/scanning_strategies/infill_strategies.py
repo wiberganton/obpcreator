@@ -190,6 +190,47 @@ def point_random(part, layer):
         obp_elements.append(obp.TimedPoints([a], [scan_settings.dwell_time], bp))
     return obp_elements
 
+# distribution with a decent distance between each point
+# further reading: https://extremelearning.com.au/unreasonable-effectiveness-of-quasirandom-sequences/
+def point_quasi_random(part, layer):
+    coord_matrix, keep_matrix = part.point_geometry.get_layer(layer)
+    scan_settings = part.infill_setting.beam_settings
+    selected_values = coord_matrix[keep_matrix == 1]
+
+    def phi(d):
+        x=2.0000
+        for i in range(10):
+            x = pow(1+x,1/(d+1))
+        return x
+
+    # number of required points
+    n = len(selected_values)
+
+    d = 1
+    g = phi(d)
+    alpha = np.zeros(d)
+    for j in range(d):
+        alpha[j] = pow(2/g,j+1) % 1
+    z = np.zeros((n, d))
+
+    # This number can be any real number.
+    # Common default setting is typically seed = 0
+    # But seed = 0.5 might be marginally better.
+
+    seed = 0
+    for i in range(n):
+        z[i] = (seed + alpha*(i+1)) % 1
+    z1 = np.array(z).flatten()
+
+    selected_values = selected_values[(np.argsort(z1))]
+
+    obp_elements = []
+    bp = obp.Beamparameters(scan_settings.spot_size, scan_settings.beam_power)
+    for point in selected_values:
+        a = obp.Point(point.real*1000, point.imag*1000)
+        obp_elements.append(obp.TimedPoints([a], [scan_settings.dwell_time], bp))
+    return obp_elements
+
 def point_ordered(part, layer):
     def n_stack(keep_array, coord_array, n_to_stack, stack_row):
         num_rows = keep_array.shape[0]
