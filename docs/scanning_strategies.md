@@ -41,6 +41,9 @@ The following scan strategies are supported:
 ### point_random
 no additional settings
 
+### point quasi random
+no additional settings
+
 ### point_ordered
 | Setting Key | Data Type | Description                                           | Example Value |
 |-------------|-----------|-------------------------------------------------------|---------------|
